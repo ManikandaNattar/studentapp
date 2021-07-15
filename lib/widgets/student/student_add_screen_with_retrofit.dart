@@ -54,6 +54,7 @@ class _AddStudentScreenWithRetrofitState
         );
       }
     } catch (error) {
+      print(error);
       setState(() {
         _isLoading = false;
       });

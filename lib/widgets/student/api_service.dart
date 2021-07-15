@@ -8,8 +8,8 @@ part 'api_service.g.dart';
 abstract class ApiService {
   factory ApiService(Dio dio, {String? baseUrl}) {
     dio.options = BaseOptions(
-      connectTimeout: 30000,
-      receiveTimeout: 30000,
+      connectTimeout: 5000,
+      receiveTimeout: 5000,
       contentType: 'application/json',
       headers: {
         'Accept':'application/json'
