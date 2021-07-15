@@ -14,36 +14,49 @@ class _AddStudentScreenWithRetrofitState
     extends State<AddStudentScreenWithRetrofit> {
   TextEditingController _nameController = TextEditingController();
   TextEditingController _ageController = TextEditingController();
+  bool _isLoading = false;
 
   Future<void> _onSave() async {
-    final Map<String, dynamic> formData = {
-      'name': _nameController.text,
-      'age': _ageController.text,
-    };
-    ApiService apiService = ApiService(dio.Dio());
-    final resp = await apiService.studentCreate(
-      formData,
-    );
-    if (resp.status == 'success') {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            resp.message.toString(),
-          ),
-          backgroundColor: Theme.of(context).primaryColor,
-        ),
+    try {
+      final Map<String, dynamic> formData = {
+        'name': _nameController.text,
+        'age': _ageController.text,
+      };
+      ApiService apiService = ApiService(dio.Dio());
+      final resp = await apiService.studentCreate(
+        formData,
       );
-      _nameController.text = '';
-      _ageController.text = '';
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            resp.message.toString(),
+      if (resp.status == 'success') {
+        setState(() {
+          _isLoading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              resp.message.toString(),
+            ),
+            backgroundColor: Theme.of(context).primaryColor,
           ),
-          backgroundColor: Theme.of(context).errorColor,
-        ),
-      );
+        );
+        _nameController.text = '';
+        _ageController.text = '';
+      } else {
+        setState(() {
+          _isLoading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              resp.message.toString(),
+            ),
+            backgroundColor: Theme.of(context).errorColor,
+          ),
+        );
+      }
+    } catch (error) {
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
@@ -58,43 +71,48 @@ class _AddStudentScreenWithRetrofitState
       body: Container(
         padding: EdgeInsets.all(8.0),
         child: Center(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Column(
-                children: [
-                  TextFormField(
-                    controller: _nameController,
-                    decoration: InputDecoration(
-                      labelText: 'Name',
-                      border: OutlineInputBorder(),
+          child: _isLoading == true
+              ? CircularProgressIndicator()
+              : Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Column(
+                      children: [
+                        TextFormField(
+                          controller: _nameController,
+                          decoration: InputDecoration(
+                            labelText: 'Name',
+                            border: OutlineInputBorder(),
+                          ),
+                        ),
+                        SizedBox(
+                          height: 15.0,
+                        ),
+                        TextFormField(
+                          controller: _ageController,
+                          decoration: InputDecoration(
+                            labelText: 'Age',
+                            border: OutlineInputBorder(),
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                  SizedBox(
-                    height: 15.0,
-                  ),
-                  TextFormField(
-                    controller: _ageController,
-                    decoration: InputDecoration(
-                      labelText: 'Age',
-                      border: OutlineInputBorder(),
+                    SizedBox(
+                      height: 15.0,
                     ),
-                  ),
-                ],
-              ),
-              SizedBox(
-                height: 15.0,
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  _onSave();
-                },
-                child: Text(
-                  'SAVE',
+                    ElevatedButton(
+                      onPressed: () {
+                        setState(() {
+                          _isLoading = true;
+                        });
+                        _onSave();
+                      },
+                      child: Text(
+                        'SAVE',
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-            ],
-          ),
         ),
       ),
     );
